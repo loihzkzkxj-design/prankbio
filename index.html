@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="b54cf9a6f6c21864a339e44d6c63d1ee23f71945" content="b54cf9a6f6c21864a339e44d6c63d1ee23f71945" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="monetag" content="5f0cfd2bd8873b16eeb6ba1920fa4101">
+<title>Follower Bio Generator</title>
+<style>
+  :root {
+    --bg: #0f0f13;
+    --card: #1a1a22;
+    --border: #2a2a35;
+    --text: #e8e8f0;
+    --muted: #8888a0;
+    --accent: #6c5ce7;
+    --accent-hover: #7f70f0;
+    --success: #00b894;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .container {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+
+  h1 {
+    font-size: 22px;
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+
+  label {
+    display: block;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    margin-top: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  input {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input:focus { border-color: var(--accent); }
+  input::placeholder { color: #55556a; }
+
+  button {
+    width: 100%;
+    margin-top: 24px;
+    padding: 14px;
+    background: var(--accent);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  button:hover { background: var(--accent-hover); }
+  button:active { transform: scale(0.98); }
+
+  .output-section {
+    margin-top: 28px;
+    display: none;
+  }
+
+  .output-section.visible { display: block; }
+
+  .output-label {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .output-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    min-height: 80px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    font-size: 20px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    cursor: text;
+    user-select: all;
+  }
+
+  .copy-btn {
+    margin-top: 12px;
+    background: var(--success);
+  }
+
+  .copy-btn:hover { background: #00d4a8; }
+  .copy-btn.copied { background: #00695c; }
+
+  /* --- Individual character cards --- */
+  .char-section {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .char-section-title {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Flex row so all cards stay on one line */
+  .char-grid {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  .char-card {
+    flex: 1 1 0;
+    min-width: 0;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 8px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .char-display {
+    font-size: 18px;
+    line-height: 1.4;
+    min-height: 28px;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    user-select: all;
+    cursor: text;
+    max-width: 100%;
+  }
+
+  .char-display.invisible-char {
+    background: repeating-linear-gradient(
+      45deg,
+      var(--card),
+      var(--card) 4px,
+      #23232c 4px,
+      #23232c 8px
+    );
+    border-radius: 6px;
+    padding: 2px 6px;
+    min-width: 28px;
+  }
+
+  .char-copy-btn {
+    width: 100%;
+    margin-top: 0;
+    padding: 6px 6px;
+    background: var(--accent);
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .char-copy-btn:hover { background: var(--accent-hover); }
+  .char-copy-btn.copied { background: var(--success); }
+
+  .char-caption {
+    font-size: 10px;
+    color: var(--muted);
+    line-height: 1.3;
+    text-align: center;
+    word-wrap: break-word;
+  }
+
+  .note {
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .note code {
+    background: var(--bg);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 11px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Follower Bio Generator</h1>
+  <p class="subtitle">Fill in your details and get a styled bio.</p>
+
+  <label for="firstName">First Name</label>
+  <input type="text" id="firstName" placeholder="e.g. John" autocomplete="off">
+
+  <label for="lastName">Last Name</label>
+  <input type="text" id="lastName" placeholder="e.g. Doe" autocomplete="off">
+
+  <label for="followers">Followers</label>
+  <input type="text" id="followers" placeholder="e.g. 1.5M or 1500000" autocomplete="off">
+
+  <label for="following">Following</label>
+  <input type="text" id="following" placeholder="e.g. 13" autocomplete="off">
+
+  <button id="generateBtn">Done — Generate Bio</button>
+
+  <div class="output-section" id="outputSection">
+    <div class="output-label">Your Bio</div>
+    <div class="output-box" id="outputBox"></div>
+    <button class="copy-btn" id="copyBtn">Copy to Clipboard</button>
+    <p class="note">
+      The badge character <code>󱢏</code> is a Private Use Unicode character and may not render on all devices.
+    </p>
+  </div>
+
+  <!-- Always-visible character copy section -->
+  <div class="char-section">
+    <div class="char-section-title">Copy Individual Characters</div>
+    <div class="char-grid">
+      <div class="char-card">
+        <div class="char-display" id="charBadge">󱢏</div>
+        <button class="char-copy-btn" data-char="badge">Copy Badge</button>
+        <div class="char-caption">Verified badge</div>
+      </div>
+      <div class="char-card">
+        <div class="char-display" id="charZalgo">ۦۦٰ۪۫ۦٰ۪۫ۦٰ ۦۦٰ۪۫ۦٰ۪۫ۦٰ</div>
+        <button class="char-copy-btn" data-char="zalgo">Copy Symbols</button>
+        <div class="char-caption">Arabic ornament</div>
+      </div>
+      <div class="char-card">
+        <div class="char-display invisible-char" id="charHangul">ㅤ</div>
+        <button class="char-copy-btn" data-char="hangul">Copy Filler</button>
+        <div class="char-caption">Hangul Filler (U+3164)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---- Bold Sans-Serif mapping ----
+  const BOLD_SANS = (() => {
+    const map = {};
+    const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const lower = "abcdefghijklmnopqrstuvwxyz";
+    const digits = "0123456789";
+
+    for (let i = 0; i < 26; i++) {
+      map[upper[i]] = String.fromCodePoint(0x1D5D4 + i);
+      map[lower[i]] = String.fromCodePoint(0x1D5EE + i);
+    }
+    for (let i = 0; i < 10; i++) {
+      map[digits[i]] = String.fromCodePoint(0x1D7EC + i);
+    }
+    return map;
+  })();
+
+  function toBoldSans(text) {
+    let out = "";
+    for (const ch of text) {
+      out += BOLD_SANS[ch] || ch;
+    }
+    return out;
+  }
+
+  // ---- Number formatting ----
+  function formatFollowers(raw) {
+    const trimmed = raw.trim();
+    if (trimmed === "") return "";
+
+    if (/^\d+$/.test(trimmed)) {
+      const n = parseInt(trimmed, 10);
+      if (n >= 1_000_000_000) {
+        return (n / 1_000_000_000).toFixed(1).replace(/\.0$/, "") + "B";
+      }
+      if (n >= 1_000_000) {
+        return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+      }
+      if (n >= 1_000) {
+        return (n / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
+      }
+      return String(n);
+    }
+    return trimmed;
+  }
+
+  // ---- Build bio ----
+  const BADGE = "\u{F188F}"; // 󱢏
+  const NBSP = "\u2800";     // ⠀
+
+  function buildBio(firstName, lastName, followers, following) {
+    const fName = toBoldSans(firstName.trim());
+    const lName = toBoldSans(lastName.trim());
+    const fol = toBoldSans(followers.trim());
+    const folg = toBoldSans(following.trim());
+
+    const line1 = `${NBSP} ${NBSP} ${NBSP} ${fName}  ${lName} ${BADGE}`;
+    const line2 = `${fol} followers • ${folg} following`;
+
+    return line1 + "\n" + line2;
+  }
+
+  // ---- Generic copy helper ----
+  async function copyText(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (err) {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      let ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+      document.body.removeChild(ta);
+      return ok;
+    }
+  }
+
+  // ---- Wire up UI ----
+  const $ = (id) => document.getElementById(id);
+
+  $("generateBtn").addEventListener("click", () => {
+    const firstName = $("firstName").value;
+    const lastName = $("lastName").value;
+    const followersRaw = $("followers").value;
+    const following = $("following").value;
+
+    if (!firstName.trim()) {
+      alert("Please enter a first name.");
+      return;
+    }
+
+    const followers = formatFollowers(followersRaw);
+    const bio = buildBio(firstName, lastName, followers, following);
+
+    $("outputBox").textContent = bio;
+    $("outputSection").classList.add("visible");
+    $("copyBtn").textContent = "Copy to Clipboard";
+    $("copyBtn").classList.remove("copied");
+    $("outputSection").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  });
+
+  $("copyBtn").addEventListener("click", async () => {
+    const text = $("outputBox").textContent;
+    const ok = await copyText(text);
+    if (ok) {
+      $("copyBtn").textContent = "✓ Copied!";
+      $("copyBtn").classList.add("copied");
+      setTimeout(() => {
+        $("copyBtn").textContent = "Copy to Clipboard";
+        $("copyBtn").classList.remove("copied");
+      }, 2000);
+    }
+  });
+
+  // ---- Individual character copy buttons ----
+  const CHAR_SOURCES = {
+    badge: () => $("charBadge").textContent,
+    zalgo: () => $("charZalgo").textContent,
+    hangul: () => $("charHangul").textContent
+  };
+
+  document.querySelectorAll(".char-copy-btn").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const which = btn.getAttribute("data-char");
+      const getter = CHAR_SOURCES[which];
+      if (!getter) return;
+
+      const text = getter();
+      const ok = await copyText(text);
+      if (ok) {
+        const original = btn.textContent;
+        btn.textContent = "✓ Copied!";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.classList.remove("copied");
+        }, 2000);
+      }
+    });
+  });
+</script>
+</body>
+</html>
